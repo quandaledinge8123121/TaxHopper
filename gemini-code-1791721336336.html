@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax-Hopper | Gen Math PETA Dashboard</title>
+    <style>
+        :root {
+            --primary: #2C5E2A;
+            --primary-light: #4A8C44;
+            --primary-dark: #1E3F1C;
+            --accent: #588157;
+            --bg-gradient: linear-gradient(135deg, #EAEFE6 0%, #D8E4D0 100%);
+            --card-bg: #FFFFFF;
+            --text: #1C2E1A;
+            --text-muted: #5B6E59;
+            --border: #C8D8C0;
+            --shadow: 0 20px 40px rgba(44, 94, 42, 0.12);
+            --radius: 20px;
+        }
+
+        [data-theme="dark"] {
+            --primary: #528B4C;
+            --primary-light: #6FAF67;
+            --primary-dark: #2C5E2A;
+            --accent: #8FA88E;
+            --bg-gradient: linear-gradient(135deg, #0D140C 0%, #172415 100%);
+            --card-bg: #152014;
+            --text: #E5ECE4;
+            --text-muted: #8FA18C;
+            --border: #263B24;
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 420px;
+            height: 860px;
+            background-color: var(--card-bg);
+            border: 10px solid var(--primary-dark);
+            border-radius: 44px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .status-bar {
+            background-color: var(--card-bg);
+            padding: 14px 26px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .screen-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: none;
+            flex-direction: column;
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .screen-content.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--primary);
+            margin-top: 0;
+            font-weight: 700;
+        }
+
+        .logo-area {
+            text-align: center;
+            margin: 15px 0 20px 0;
+        }
+
+        .logo-area h1 {
+            font-size: 32px;
+            margin-bottom: 4px;
+            letter-spacing: 2px;
+            color: var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-area p {
+            font-style: italic;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            background-color: var(--card-bg);
+            color: var(--text);
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: all 0.25s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(74, 140, 68, 0.15);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            margin-top: 12px;
+            box-shadow: 0 6px 20px rgba(44, 94, 42, 0.25);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(44, 94, 42, 0.35);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6C757D 0%, #494F54 100%);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.25);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+
+        .checkbox-group input {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .result-box {
+            background-color: var(--card-bg);
+            border: 2px dashed var(--primary-light);
+            border-radius: var(--radius);
+            padding: 18px;
+            margin-top: 18px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .result-item.total {
+            font-weight: 800;
+            font-size: 16px;
+            color: var(--primary);
+            border-top: 2px solid var(--border);
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .error-msg {
+            color: #E63946;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 700;
+        }
+
+        .creators-badge {
+            background: linear-gradient(135deg, rgba(74, 140, 68, 0.08) 0%, rgba(44, 94, 42, 0.12) 100%);
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        .creators-badge h4 {
+            margin: 0 0 4px 0;
+            font-size: 13px;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .creators-badge p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .toolbar {
+            background-color: var(--card-bg);
+            padding: 12px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-container">
+    <div class="status-bar">
+        <span>Tax-Hopper PETA</span>
+        <span id="clock">00:00</span>
+    </div>
+
+    <!-- SCREEN 1: LOGIN -->
+    <div id="screen-login" class="screen-content active">
+        <div class="logo-area">
+            <h1>TAX-HOPPER</h1>
+            <p>"Hop Smarter. Save Better."</p>
+        </div>
+        
+        <div class="card" style="padding: 20px; margin-bottom: 20px;">
+            <div style="text-align: center; margin-bottom: 16px;">
+                <h3 style="margin: 0 0 4px 0; font-size: 18px;">Welcome Back</h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Demo credentials: <b>admin</b> / <b>admin123</b></p>
+            </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="login-user" value="admin" placeholder="Enter username">
+            </div>
+            <div class="form-group" style="margin-bottom: 4px;">
+                <label>Password</label>
+                <input type="password" id="login-pass" value="admin123" placeholder="Enter password">
+            </div>
+            <button onclick="handleLogin()">Sign In</button>
+            <div id="login-error" class="error-msg"></div>
+        </div>
+
+        <div class="creators-badge">
+            <h4>Group 3 PETA Creators</h4>
+            <p><b>Martinez, Juarez, Piccio</b> (11E)<br>Colegio San Agustin - Makati</p>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: HOMESCREEN -->
+    <div id="screen-home" class="screen-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div>
+                <h2 style="margin: 0; font-size: 22px;">Hello, ADMIN!</h2>
+                <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">General Mathematics PETA</p>
+            </div>
+            <button onclick="switchScreen('screen-login')" class="btn-secondary" style="width: auto; padding: 8px 16px; font-size: 12px; margin-top:0;">Logout</button>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 10px;">
+            <button onclick="switchScreen('screen-payroll')" style="padding: 20px; font-size: 15px; text-align: left; display: flex; align-items: center; gap: 16px;">
+                <span style="font-size: 28px; background: rgba(255,255,255,0.15); padding: 8px; border-radius: 12px;">📊</span>
+                <div>
+                    <div style="font-weight: 700; font-size: 16px;">Payroll Calculator</div>
+                    <div style="font-size: 11px; opacity: 0.85; font-weight: normal; margin-top: 2px;">Compute net pay, SSS/GSIS, & tax</div>
+                </div>
+            </button>
+            <button onclick="switchScreen('screen-savings')" style="padding: 20px; font-size: 15px; background: linear-gradient(135deg, #588157 0%, #3A5A40 100%); text-align: left; display: flex; align-items: center; gap: 16px;">
+                <span style="font-size: 28px; background: rgba(255,255,255,0.15); padding: 8px; border-radius: 12px;">💰</span>
+                <div>
+                    <div style="font-weight: 700; font-size: 16px;">Savings & Series</div>
+                    <div style="font-size: 11px; opacity: 0.85; font-weight: normal; margin-top: 2px;">Calculate compound future value</div>
+                </div>
+            </button>
+            <button onclick="switchScreen('screen-settings')" style="padding: 18px; font-size: 15px; background: linear-gradient(135deg, #4A6B46 0%, #2F4C2C 100%); text-align: left; display: flex; align-items: center; gap: 16px;">
+                <span style="font-size: 26px; background: rgba(255,255,255,0.15); padding: 8px; border-radius: 12px;">⚙️</span>
+                <div>
+                    <div style="font-weight: 700; font-size: 16px;">App Settings</div>
+                    <div style="font-size: 11px; opacity: 0.85; font-weight: normal; margin-top: 2px;">Appearance & team details</div>
+                </div>
+            </button>
+        </div>
+
+        <div class="creators-badge" style="margin-top: auto;">
+            <h4>Colegio San Agustin - Makati</h4>
+            <p>Grade 11 • Section 11E</p>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: PAYROLL CALCULATOR -->
+    <div id="screen-payroll" class="screen-content">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="margin:0; font-size: 20px;">Payroll Calculator</h3>
+            <button onclick="switchScreen('screen-home')" class="btn-secondary" style="width: auto; padding: 6px 14px; font-size: 12px; margin-top:0;">Back</button>
+        </div>
+
+        <div class="card">
+            <div class="form-group">
+                <label>Employment Type</label>
+                <select id="emp-type">
+                    <option value="private">Private Employee (SSS)</option>
+                    <option value="public">Government Employee (GSIS)</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label>Basic Monthly Salary (₱)</label>
+                <input type="number" id="basic-salary" value="30000" placeholder="e.g. 30000">
+            </div>
+        </div>
+
+        <div class="card">
+            <label style="color: var(--primary); margin-bottom: 8px;">🌙 Night Differential</label>
+            <div class="checkbox-group">
+                <input type="checkbox" id="chk-night" onchange="toggleNightFields()">
+                <label for="chk-night" style="margin:0; text-transform: none; font-size: 13px; font-weight: 500; color: var(--text);">Include Night Differential</label>
+            </div>
+            <div id="night-fields" style="display: none; margin-top: 12px;">
+                <div class="form-group">
+                    <label>Hourly Rate (₱)</label>
+                    <input type="number" id="nd-rate" value="50">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Total Hours</label>
+                    <input type="number" id="nd-hours" value="20">
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <label style="color: var(--primary); margin-bottom: 8px;">💼 Commission Work</label>
+            <div class="checkbox-group">
+                <input type="checkbox" id="chk-comm" onchange="toggleCommFields()">
+                <label for="chk-comm" style="margin:0; text-transform: none; font-size: 13px; font-weight: 500; color: var(--text);">Include Commission Work</label>
+            </div>
+            <div id="comm-fields" style="display: none; margin-top: 12px;">
+                <div class="form-group">
+                    <label>Commission Rate (%)</label>
+                    <input type="number" id="comm-rate" value="5">
+                </div>
+                <div class="form-group">
+                    <label>Product Price (₱)</label>
+                    <input type="number" id="comm-price" value="1000">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Total Sold</label>
+                    <input type="number" id="comm-sold" value="10">
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="form-group" style="margin-bottom:0;">
+                <label>De Minimis Allowances (₱)</label>
+                <input type="number" id="de-minimis" value="2000" placeholder="Added at the very end">
+            </div>
+        </div>
+
+        <button onclick="calculatePayroll()">Calculate Net Pay</button>
+
+        <div id="payroll-results" class="result-box" style="display: none;">
+            <h4 style="margin-bottom: 12px; font-size: 15px;">Official Calculation Breakdown</h4>
+            <div class="result-item"><span>Basic Monthly Salary:</span> <span id="res-basic">₱0.00</span></div>
+            <div class="result-item"><span>Night Diff Pay:</span> <span id="res-nd">₱0.00</span></div>
+            <div class="result-item"><span>Commission Pay:</span> <span id="res-comm">₱0.00</span></div>
+            <div class="result-item" style="font-weight:700; border-top: 1px dashed var(--border); padding-top:6px;"><span>Total Earnings:</span> <span id="res-earnings">₱0.00</span></div>
+            <hr style="border:0; border-top:1px solid var(--border); margin:10px 0;">
+            <div class="result-item"><span id="lbl-gov-type">SSS Contribution:</span> <span id="res-gov">₱0.00</span></div>
+            <div class="result-item"><span>PhilHealth (2.5%):</span> <span id="res-phil">₱0.00</span></div>
+            <div class="result-item"><span>Pag-IBIG (2% cap 200):</span> <span id="res-pag">₱0.00</span></div>
+            <div class="result-item" style="font-weight:700; color:var(--primary);"><span>Net Taxable Income (NTI):</span> <span id="res-nti">₱0.00</span></div>
+            <div class="result-item"><span>Withholding Tax:</span> <span id="res-tax">₱0.00</span></div>
+            <div class="result-item"><span>De Minimis (Added Back):</span> <span id="res-dem">₱0.00</span></div>
+            <div class="result-item total"><span>Final Take-Home Pay:</span> <span id="res-net">₱0.00</span></div>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: SAVINGS CALCULATOR -->
+    <div id="screen-savings" class="screen-content">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="margin:0; font-size: 20px;">Savings & Series</h3>
+            <button onclick="switchScreen('screen-home')" class="btn-secondary" style="width: auto; padding: 6px 14px; font-size: 12px; margin-top:0;">Back</button>
+        </div>
+        <div class="card">
+            <div class="form-group"><label>Initial Amount (₱)</label><input type="number" id="sav-initial" value="10000"></div>
+            <div class="form-group"><label>Monthly Savings (₱)</label><input type="number" id="sav-monthly" value="5000"></div>
+            <div class="form-group"><label>Annual Interest Rate (%)</label><input type="number" id="sav-rate" value="4"></div>
+            <div class="form-group"><label>Number of Months</label><input type="number" id="sav-months" value="12"></div>
+            <div class="form-group" style="margin-bottom:0;"><label>Target Goal (₱) [Optional]</label><input type="number" id="sav-target" value="100000"></div>
+            <button onclick="calculateSavings()" style="background: linear-gradient(135deg, #588157 0%, #3A5A40 100%);">Calculate Future Value</button>
+        </div>
+        <div id="savings-results" class="result-box" style="display: none;">
+            <h4 style="margin-bottom: 12px; font-size: 15px;">Series Projection</h4>
+            <div class="result-item"><span>Total Accumulated:</span> <span id="sav-res-total">₱0.00</span></div>
+            <div class="result-item"><span>Months to Reach Target:</span> <span id="sav-res-months">0 months</span></div>
+        </div>
+    </div>
+
+    <!-- SCREEN 5: SETTINGS -->
+    <div id="screen-settings" class="screen-content">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="margin:0; font-size: 20px;">Settings</h3>
+            <button onclick="switchScreen('screen-home')" class="btn-secondary" style="width: auto; padding: 6px 14px; font-size: 12px; margin-top:0;">Back</button>
+        </div>
+        <div class="card">
+            <div class="checkbox-group" style="padding: 4px 0;">
+                <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode()">
+                <label for="dark-mode-toggle" style="margin:0; text-transform: none; font-size: 14px; font-weight: 700; color: var(--text);">Dark Mode Appearance</label>
+            </div>
+        </div>
+        <div class="creators-badge" style="padding: 20px;">
+            <h4 style="font-size: 14px; margin-bottom: 6px;">Group 3 PETA Creators</h4>
+            <p style="font-size: 13px; font-weight: 700; color: var(--text);">Martinez, Juarez, Piccio (11E)</p>
+            <p style="font-size: 12px; margin-top: 4px; color: var(--text-muted);">Colegio San Agustin - Makati</p>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        Tax-Hopper • Gen Math PETA 2026
+    </div>
+</div>
+
+<script>
+    // Live Clock
+    setInterval(() => {
+        const d = new Date();
+        document.getElementById('clock').innerText = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }, 1000);
+
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen-content').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function handleLogin() {
+        const u = document.getElementById('login-user').value;
+        const p = document.getElementById('login-pass').value;
+        if(u === 'admin' && p === 'admin123') {
+            document.getElementById('login-error').innerText = '';
+            switchScreen('screen-home');
+        } else {
+            document.getElementById('login-error').innerText = 'Invalid credentials! Use admin / admin123';
+        }
+    }
+
+    function toggleNightFields() {
+        const show = document.getElementById('chk-night').checked;
+        document.getElementById('night-fields').style.display = show ? 'block' : 'none';
+    }
+
+    function toggleCommFields() {
+        const show = document.getElementById('chk-comm').checked;
+        document.getElementById('comm-fields').style.display = show ? 'block' : 'none';
+    }
+
+    function toggleDarkMode() {
+        const isDark = document.getElementById('dark-mode-toggle').checked;
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    }
+
+    // Official SSS Table Lookup (5% Employee Share based on MSC)
+    function getSssEmployeeContribution(grossEarnings) {
+        if (grossEarnings < 5250.00) return 5000.00 * 0.05; 
+        if (grossEarnings >= 34750.00) return 35000.00 * 0.05; 
+        let baseRangeStart = 5250.00;
+        let msc = 5500.00;
+        while (baseRangeStart < 34750.00) {
+            if (grossEarnings >= baseRangeStart && grossEarnings <= (baseRangeStart + 499.99)) {
+                return msc * 0.05;
+            }
+            baseRangeStart += 500.00;
+            msc += 500.00;
+        }
+        return 35000.00 * 0.05;
+    }
+
+    function calculatePayroll() {
+        const empType = document.getElementById('emp-type').value;
+        const basic = parseFloat(document.getElementById('basic-salary').value) || 0;
+        
+        let ndPay = 0;
+        if(document.getElementById('chk-night').checked) {
+            ndPay = (parseFloat(document.getElementById('nd-rate').value) || 0) * (parseFloat(document.getElementById('nd-hours').value) || 0);
+        }
+
+        let commPay = 0;
+        if(document.getElementById('chk-comm').checked) {
+            const rate = (parseFloat(document.getElementById('comm-rate').value) || 0) / 100;
+            const price = parseFloat(document.getElementById('comm-price').value) || 0;
+            const sold = parseFloat(document.getElementById('comm-sold').value) || 0;
+            commPay = rate * price * sold;
+        }
+
+        const deMinimis = parseFloat(document.getElementById('de-minimis').value) || 0;
+        const grossEarnings = basic + ndPay + commPay;
+
+        let govContribution = 0;
+        if(empType === 'private') {
+            govContribution = getSssEmployeeContribution(grossEarnings);
+            document.getElementById('lbl-gov-type').innerText = 'SSS Contribution (5% MSC):';
+        } else {
+            govContribution = grossEarnings * 0.09; 
+            document.getElementById('lbl-gov-type').innerText = 'GSIS Contribution (9%):';
+        }
+
+        const philhealth = basic * 0.025;
+        const pagibig = Math.min(basic * 0.02, 200.00);
+        const totalMandatoryDeductions = govContribution + philhealth + pagibig;
+        const nti = Math.max(0, basic - totalMandatoryDeductions);
+
+        let tax = 0;
+        if (nti <= 20833.00) tax = 0.00;
+        else if (nti <= 33332.00) tax = ((nti - 20833.00) * 0.15);
+        else if (nti <= 66666.00) tax = 1875.00 + ((nti - 33333.00) * 0.20);
+        else if (nti <= 166666.00) tax = 8541.80 + ((nti - 66667.00) * 0.25);
+        else if (nti <= 666666.00) tax = 33541.80 + ((nti - 166667.00) * 0.30);
+        else tax = 183541.80 + ((nti - 666667.00) * 0.35);
+
+        const totalDeductions = totalMandatoryDeductions + tax;
+        const netPay = (grossEarnings - totalDeductions) + deMinimis;
+
+        document.getElementById('payroll-results').style.display = 'block';
+        document.getElementById('res-basic').innerText = '₱' + basic.toFixed(2);
+        document.getElementById('res-nd').innerText = '₱' + ndPay.toFixed(2);
+        document.getElementById('res-comm').innerText = '₱' + commPay.toFixed(2);
+        document.getElementById('res-earnings').innerText = '₱' + grossEarnings.toFixed(2);
+        document.getElementById('res-gov').innerText = '₱' + govContribution.toFixed(2);
+        document.getElementById('res-phil').innerText = '₱' + philhealth.toFixed(2);
+        document.getElementById('res-pag').innerText = '₱' + pagibig.toFixed(2);
+        document.getElementById('res-nti').innerText = '₱' + nti.toFixed(2);
+        document.getElementById('res-tax').innerText = '₱' + tax.toFixed(2);
+        document.getElementById('res-dem').innerText = '₱' + deMinimis.toFixed(2);
+        document.getElementById('res-net').innerText = '₱' + netPay.toFixed(2);
+    }
+
+    function calculateSavings() {
+        const init = parseFloat(document.getElementById('sav-initial').value) || 0;
+        const monthly = parseFloat(document.getElementById('sav-monthly').value) || 0;
+        const rate = (parseFloat(document.getElementById('sav-rate').value) || 0) / 100 / 12;
+        const months = parseInt(document.getElementById('sav-months').value) || 12;
+        const target = parseFloat(document.getElementById('sav-target').value) || 100000;
+
+        let total = init;
+        for(let i=0; i<months; i++) total = (total + monthly) * (1 + rate);
+
+        let mCount = 0;
+        let simTotal = init;
+        while(simTotal < target && mCount < 600) {
+            simTotal = (simTotal + monthly) * (1 + rate);
+            mCount++;
+        }
+
+        document.getElementById('savings-results').style.display = 'block';
+        document.getElementById('sav-res-total').innerText = '₱' + total.toFixed(2);
+        document.getElementById('sav-res-months').innerText = mCount + ' months';
+    }
+</script>
+
+</body>
+</html>
